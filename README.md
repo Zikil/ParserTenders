@@ -1,1 +1,1 @@
-# ParserTenders
+Бот парсер для тендоров. Работает для Tender.pro
