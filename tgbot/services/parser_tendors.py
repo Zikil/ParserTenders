@@ -37,8 +37,8 @@ from tgbot.data.config import PATH_EXCEL
 #         a["Наименование аналога"].append(a["Наименование Wanlanda"])
 #     return art
 
-def get_articles():
-    link = PATH_EXCEL
+def get_articles(link = PATH_EXCEL):
+    # link = PATH_EXCEL
     all_article = pd.DataFrame(index=[], columns=['Наименование', 'Артикул'])
     excel_reader = pd.ExcelFile(link)
     for sheet_name in excel_reader.sheet_names:
@@ -53,14 +53,19 @@ def get_articles():
     return all_article[:]
 
 # для pd
-def get_urls(tender_state = 1):
+def get_urls(tender_state = 1, article = 0):
     # tender_state = 1:открытые 100:все
-    article = get_articles()
     urls = []
-    for val in article.iloc:  
-        # print(val["Артикул"])      
-        for art in val["Артикул"]:
-            urls.append({"article": f"{val['Наименование']}/{art}", "url": f"http://www.tender.pro/api/tenders/list?&good_name={art}&tender_state={tender_state}&by=1000"})
+    if (article == 0): 
+        article = get_articles()
+        for val in article.iloc:  
+            # print(val["Артикул"])      
+            for art in val["Артикул"]:
+                urls.append({"article": f"{val['Наименование']}/{art}", "url": f"http://www.tender.pro/api/tenders/list?&good_name={art}&tender_state={tender_state}&by=1000"})
+    else:
+        articles = article.split(", |,")
+        for art in articles:
+            urls.append({"article": f"{art}", "url": f"http://www.tender.pro/api/tenders/list?&good_name={art}&tender_state={tender_state}&by=1000"})
 
     return urls
 
@@ -106,6 +111,13 @@ async def bound_fetch(sem, url, session):
 
 async def get_tenders_from_url(tender_state = 1):
     urls = get_urls(tender_state)
+    return await search_tenders(urls)
+
+async def get_tenders_from_article(article):
+    urls = get_urls(article = article)
+    return await search_tenders(urls)
+
+async def search_tenders(urls):
     tasks = []
     # create instance of Semaphore
     sem = asyncio.Semaphore(5)
@@ -154,9 +166,9 @@ async def get_tenders_from_url(tender_state = 1):
 
     return tenders_id
 
-def get_excel_from_tenders(tenders_id):
+def get_excel_from_tenders(tenders_id, link = 'tgbot/data/tenders_id_all.xlsx'):
     tends = pd.DataFrame(tenders_id)
-    tends.to_excel(r'tgbot/data/tenders_id_all.xlsx')
+    tends.to_excel(link)
 
 
 

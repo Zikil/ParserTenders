@@ -1,4 +1,6 @@
 # - *- coding: utf- 8 - *-
+import os
+
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
 from aiogram.types import FSInputFile, Message, CallbackQuery
@@ -9,7 +11,7 @@ from tgbot.keyboards.reply_main import menu_frep
 from tgbot.utils.const_functions import ded
 from tgbot.utils.misc.bot_models import FSM, ARS
 from tgbot.utils.misc.bot_logging import bot_logger
-from tgbot.services.parser_tendors import get_tenders_from_url, get_excel_from_tenders
+from tgbot.services.parser_tendors import get_tenders_from_url, get_excel_from_tenders, get_articles
 from tgbot.data.config import BOT_SCHEDULER, PATH_EXCEL, PATH_LOGS
 from tgbot.utils.const_functions import get_date
 
@@ -41,19 +43,22 @@ async def main_start(message: Message, bot: Bot, state: FSM, arSession: ARS, Use
 @router.message(F.text.in_(('parser', 'Начать поиск сейчас')))
 @router.message(Command(commands=['parser']))
 async def parser(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
-    bot_logger.warning(f"command parser from {User.user_name}")
-    await message.answer("Идет поиск тендеров")
-    tenders_id = await get_tenders_from_url()
-    bot_logger.warning(f"tenders_id: {tenders_id}")
-    answ = ""
-    for num, tend in enumerate(tenders_id):
-        answ += f"{num+1}. Наименование/артикул: {tend['article']}, id тендера: {tend['id_tender']}, url: {tend['url_tender']} \n \n"
-    mes = f"Ответ на запрос поиска тендеров: \n \n"
-    if answ == "":
-        mes += "Ничего не найдено"
-    else:
-        mes += answ
-    await message.answer(f"{mes}")
+    try:
+        bot_logger.warning(f"command parser from {User.user_name}")
+        await message.answer("Идет поиск тендеров")
+        tenders_id = await get_tenders_from_url()
+        bot_logger.warning(f"tenders_id: {tenders_id}")
+        answ = ""
+        for num, tend in enumerate(tenders_id):
+            answ += f"{num+1}. Наименование/артикул: {tend['article']}, id тендера: {tend['id_tender']}, url: {tend['url_tender']} \n \n"
+        mes = f"Ответ на запрос поиска тендеров: \n \n"
+        if answ == "":
+            mes += "Ничего не найдено"
+        else:
+            mes += answ
+        await message.answer(f"{mes}")
+    except Exception as e:
+        await message.answer(f"Ошибка: {e}")
 
 
 # status 
@@ -99,9 +104,16 @@ async def upload_excel(message: Message, bot: Bot, state: FSM, arSession: ARS, U
         file_id = message.document.file_id
         file = await bot.get_file(file_id)
         file_path = file.file_path
+        link_temp = "tgbot/data/articles_sheet_temp.xlsx"
+        await bot.download_file(file_path, link_temp)
+        try:
+            arts = get_articles(link=link_temp)
+            bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, загружен")
+            await message.answer("Таблица загружена")
+        except Exception as e:
+            bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, не загружен. Ошибка {e}")
+            await message.answer(f"Ошибка {e} \nФайл не был загружен")
         await bot.download_file(file_path, "tgbot/data/articles_sheet.xlsx")
-        bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, загружен")
-        await message.answer("Таблица загружена")
     else:
         bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, не загружен")
         await message.answer("Файл должен быть с расширением .xls или .xlsx")
@@ -152,3 +164,5 @@ async def admin_log(message: Message, bot: Bot, state: FSM, arSession: ARS, User
         media_group.add_document(media=FSInputFile("tgbot/data/sv_log_out.log"))
 
     await message.answer_media_group(media=media_group.build())
+
+

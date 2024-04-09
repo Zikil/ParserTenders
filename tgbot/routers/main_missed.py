@@ -1,10 +1,14 @@
 # - *- coding: utf- 8 - *-
+import io
 from aiogram import Router, Bot, F
-from aiogram.types import CallbackQuery, Message
-
+from aiogram.types import CallbackQuery, Message, BufferedInputFile
+import aiogram
+import pandas as pd
 from tgbot.database.db_users import UserModel
 from tgbot.utils.const_functions import del_message
 from tgbot.utils.misc.bot_models import FSM, ARS
+
+from tgbot.services.parser_tendors import get_tenders_from_article, get_excel_from_tenders
 
 router = Router(name=__name__)
 
@@ -30,7 +34,28 @@ async def main_callback_missed(call: CallbackQuery, bot: Bot, state: FSM, arSess
 # Обработка всех неизвестных команд
 @router.message()
 async def main_message_missed(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
-    await message.answer(
-        "♦️ Unknown command.\n"
-        "♦️ Enter /start",
-    )
+    try:
+        tenders = await get_tenders_from_article(message.text)
+        if (len(str(tenders))>1000):
+            tenders = pd.DataFrame(tenders)
+            get_excel_from_tenders(tenders)
+            with io.BytesIO() as output:
+                tenders.to_excel(output) 
+                excel_data = output.getvalue()
+            file_excel = io.BytesIO(excel_data)
+            await message.answer_document(BufferedInputFile(file_excel.getvalue(), f"{message.text}.xlsx"), caption = f"Нашлось по запросу '{message.text}'")
+        else:
+            answ = ""
+            for num, tend in enumerate(tenders):
+                answ += f"\n{num+1}. Наименование/артикул: {tend['article']}, id тендера: {tend['id_tender']}, url: {tend['url_tender']} \n"
+            mes = f"Нашлось по запросу {message.text}: \n"
+            if answ == "":
+                mes += "Ничего не найдено"
+            else:
+                mes += answ
+            await message.answer(f"{mes}")
+    # except aiogram.exceptions.TelegramBadRequest:
+    #     await message.answer(f"Ошибка: wg mes too long, {len(str(tenders))}")
+    except Exception as e:
+        await message.answer(f"Ошибка: {e}")
+
