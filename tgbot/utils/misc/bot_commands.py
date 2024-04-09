@@ -12,6 +12,8 @@ user_commands = [
     BotCommand(command="get_notif", description="получать уведомления"),
     BotCommand(command="stop_get", description="остановить получение уведомлений"),
     BotCommand(command="get_sheet", description="Получить таблицу"),
+    BotCommand(command="excel_from_tenders", description="Поиск за все время"),
+    BotCommand(command="log", description="Get Logs"),
     # BotCommand(command="inline", description="🌀 Get Inline keyboard"),
 ]
 
@@ -25,8 +27,9 @@ admin_commands = [
     BotCommand(command="start_shed", description="Запуск работы по расписанию"),
     BotCommand(command="stop_shed", description="остановка работы по расписанию"),
     BotCommand(command="get_sheet", description="Получить таблицу"),
+    BotCommand(command="excel_from_tenders", description="Поиск за все время"),
+    BotCommand(command="log", description="Get Logs"),
     # BotCommand(command="inline", description="🌀 Get Inline keyboard"),
-    BotCommand(command="log", description="🖨 Get Logs"),
     BotCommand(command="db", description="📦 Get Database"),
 ]
 

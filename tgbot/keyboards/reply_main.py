@@ -30,7 +30,7 @@ def menu_frep(user_id: int) -> ReplyKeyboardMarkup:
     )
 
     keyboard.row(
-        rkb("Показать таблицу"),
+        rkb("Показать таблицу"), rkb("Поиск за все время"),
     )
 
     # if user_id in get_admins():

@@ -91,20 +91,21 @@ async def bound_fetch(sem, url, session):
         return await fetch(url, session)
 
 
-def get_tenders_from_url1(urls = get_urls()):
-    tenders_id = []
-    for url in urls:
-        response = requests.get(url["url"])
-        soup = BeautifulSoup(response.content, "html.parser")
-        for tender in soup.find_all("td", class_="tender__id"):
-            id_tender = tender.text
-            print(id_tender + str(url["article"]))
-            tenders_id.append({"article": url["article"], "id_tender": id_tender, "url_tender": f"https://www.tender.pro/api/tender/{id_tender}/view_public"})
-    return tenders_id
+# def get_tenders_from_url1():
+#     urls = get_urls()
+#     tenders_id = []
+#     for url in urls:
+#         response = requests.get(url["url"])
+#         soup = BeautifulSoup(response.content, "html.parser")
+#         for tender in soup.find_all("td", class_="tender__id"):
+#             id_tender = tender.text
+#             print(id_tender + str(url["article"]))
+#             tenders_id.append({"article": url["article"], "id_tender": id_tender, "url_tender": f"https://www.tender.pro/api/tender/{id_tender}/view_public"})
+#     return tenders_id
 
 
-async def get_tenders_from_url():
-    urls = get_urls()
+async def get_tenders_from_url(tender_state = 1):
+    urls = get_urls(tender_state)
     tasks = []
     # create instance of Semaphore
     sem = asyncio.Semaphore(5)
@@ -126,16 +127,36 @@ async def get_tenders_from_url():
     tenders_id = []
     for res in results:
         soup = BeautifulSoup(res["response"], "html.parser")   
+        pag = soup.find("div", class_="pagination-pages")
+        print(f"pag: {pag}")
+        if (pag != None):
+            print(f"pag: {str(pag)[44:45]}")
+            pages = int(str(pag)[44:45])
+            urls2 = []
+            for i in range(pages):
+                urls2.append(f"{res['url']['url']}&page={i}")
+            print(urls2)
+            for ur in urls2:
+                response = requests.get(ur)
+                soup1 = BeautifulSoup(response.content, "html.parser")
+                for tender in soup1.find_all("td", class_="tender__id"):
+                    id_tender = tender.text
+                    print(id_tender)
+                    tenders_id.append({"article": res['url']['article'], "id_tender": id_tender, "url_tender": f"https://www.tender.pro/api/tender/{id_tender}/view_public"})
         for tender in soup.find_all("td", class_="tender__id"):
             id_tender = tender.text
             print(id_tender)
-            tenders_id.append({"article": res['url']['article'], "id_tender": id_tender, "url_tender": f"https://www.tender.pro/api/tender/{res['url']['url']}/view_public"})
+            tenders_id.append({"article": res['url']['article'], "id_tender": id_tender, "url_tender": f"https://www.tender.pro/api/tender/{id_tender}/view_public"})
 
     print(time() - t1)
     for tend in tenders_id:
         print(tend)
 
     return tenders_id
+
+def get_excel_from_tenders(tenders_id):
+    tends = pd.DataFrame(tenders_id)
+    tends.to_excel(r'tgbot/data/tenders_id_all.xlsx')
 
 
 

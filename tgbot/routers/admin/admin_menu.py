@@ -80,25 +80,25 @@ async def admin_database(message: Message, bot: Bot, state: FSM, arSession: ARS,
     )
 
 
-# Получение логов
-@router.message(Command(commands=['log', 'logs']))
-async def admin_log(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
-    await state.clear()
+# # Получение логов
+# @router.message(Command(commands=['log', 'logs']))
+# async def admin_log(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
+#     await state.clear()
 
-    media_group = MediaGroupBuilder(
-        caption=f"<b>🖨 #LOGS | <code>{get_date(full=False)}</code></b>",
-    )
+#     media_group = MediaGroupBuilder(
+#         caption=f"<b>🖨 #LOGS | <code>{get_date(full=False)}</code></b>",
+#     )
 
-    if os.path.isfile(PATH_LOGS):
-        media_group.add_document(media=FSInputFile(PATH_LOGS))
+#     if os.path.isfile(PATH_LOGS):
+#         media_group.add_document(media=FSInputFile(PATH_LOGS))
 
-    if os.path.isfile("tgbot/data/sv_log_err.log"):
-        media_group.add_document(media=FSInputFile("tgbot/data/sv_log_err.log"))
+#     if os.path.isfile("tgbot/data/sv_log_err.log"):
+#         media_group.add_document(media=FSInputFile("tgbot/data/sv_log_err.log"))
 
-    if os.path.isfile("tgbot/data/sv_log_out.log"):
-        media_group.add_document(media=FSInputFile("tgbot/data/sv_log_out.log"))
+#     if os.path.isfile("tgbot/data/sv_log_out.log"):
+#         media_group.add_document(media=FSInputFile("tgbot/data/sv_log_out.log"))
 
-    await message.answer_media_group(media=media_group.build())
+#     await message.answer_media_group(media=media_group.build())
 
 
 # Очистить логи
