@@ -61,7 +61,7 @@ async def autobackup_admin(bot: Bot):
 # поиск тендора по расписанию
 async def tenders_sched(bot: Bot):
     try:
-        tenders_id = get_tenders_from_url()
+        tenders_id = await get_tenders_from_url()
         bot_logger.warning(f"tenders_id: {tenders_id}")
         answ = ""
         for num, tend in enumerate(tenders_id):

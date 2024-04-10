@@ -1,6 +1,7 @@
 settings.ini
-*.xls
 *.xlsx
+*.xls
+*.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

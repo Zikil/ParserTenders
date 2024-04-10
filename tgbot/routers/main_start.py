@@ -109,11 +109,11 @@ async def upload_excel(message: Message, bot: Bot, state: FSM, arSession: ARS, U
         try:
             arts = get_articles(link=link_temp)
             bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, загружен")
+            await bot.download_file(file_path, "tgbot/data/articles_sheet.xlsx")
             await message.answer("Таблица загружена")
         except Exception as e:
             bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, не загружен. Ошибка {e}")
             await message.answer(f"Ошибка {e} \nФайл не был загружен")
-        await bot.download_file(file_path, "tgbot/data/articles_sheet.xlsx")
     else:
         bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, не загружен")
         await message.answer("Файл должен быть с расширением .xls или .xlsx")
