@@ -36,7 +36,7 @@ async def main_callback_missed(call: CallbackQuery, bot: Bot, state: FSM, arSess
 async def main_message_missed(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
     try:
         tenders = await get_tenders_from_article(message.text)
-        if (len(str(tenders))>1000):
+        if (len(str(tenders))>2000):
             tenders = pd.DataFrame(tenders)
             get_excel_from_tenders(tenders)
             with io.BytesIO() as output:
@@ -47,7 +47,7 @@ async def main_message_missed(message: Message, bot: Bot, state: FSM, arSession:
         else:
             answ = ""
             for num, tend in enumerate(tenders):
-                answ += f"\n{num+1}. Наименование/артикул: {tend['article']}, id тендера: {tend['id_tender']}, url: {tend['url_tender']} \n"
+                answ += f"{num+1}. Наименование/артикул: {tend['article']}, id тендера: {tend['id_tender']}, прием до: {tend['date_until']}, url: {tend['url_tender']} \n"
             mes = f"Нашлось по запросу {message.text}: \n"
             if answ == "":
                 mes += "Ничего не найдено"

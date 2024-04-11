@@ -22,8 +22,8 @@ colorama.init()
 # Запуск шедулеров
 async def scheduler_start(bot):
     # BOT_SCHEDULER.add_job(autobackup_admin, trigger="cron", hour=00, args=(bot,))  # Ежедневный Автобэкап в 00:00
-    BOT_SCHEDULER.add_job(tenders_sched, 'cron', hour='1', minute='0', args=(bot,))  # 
-    BOT_SCHEDULER.add_job(tenders_sched, 'cron', hour='11', minute='0', args=(bot,))  # 
+    BOT_SCHEDULER.add_job(tenders_sched, 'cron', hour='8', minute='0', args=(bot,))  # 
+    BOT_SCHEDULER.add_job(tenders_sched, 'cron', hour='18', minute='0', args=(bot,))  # 
 
 # scheduler.add_job(func, 'cron', day_of_week='mon-fri', hour=5, minute=30, end_date='2021-05-30')
 

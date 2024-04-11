@@ -22,7 +22,7 @@ def menu_frep(user_id: int) -> ReplyKeyboardMarkup:
     # BotCommand(command="db", description="📦 Get Database"),
 
     keyboard.row(
-        rkb("Начать поиск сейчас"), rkb("Статус бота"),
+        rkb("Начать поиск сейчас"), rkb("Поиск за все время"),
     )
 
     keyboard.row(
@@ -30,7 +30,7 @@ def menu_frep(user_id: int) -> ReplyKeyboardMarkup:
     )
 
     keyboard.row(
-        rkb("Показать таблицу"), rkb("Поиск за все время"),
+        rkb("Показать таблицу"), rkb("Статус бота"),
     )
 
     # if user_id in get_admins():

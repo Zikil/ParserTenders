@@ -1,9 +1,10 @@
 # - *- coding: utf- 8 - *-
-import os
+import io
+import pandas as pd
 
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
-from aiogram.types import FSInputFile, Message, CallbackQuery
+from aiogram.types import FSInputFile, Message, CallbackQuery, BufferedInputFile
 
 from aiogram.utils.media_group import MediaGroupBuilder
 from tgbot.database.db_users import UserModel, Userx
@@ -48,15 +49,24 @@ async def parser(message: Message, bot: Bot, state: FSM, arSession: ARS, User: U
         await message.answer("Идет поиск тендеров")
         tenders_id = await get_tenders_from_url()
         bot_logger.warning(f"tenders_id: {tenders_id}")
-        answ = ""
-        for num, tend in enumerate(tenders_id):
-            answ += f"{num+1}. Наименование/артикул: {tend['article']}, id тендера: {tend['id_tender']}, url: {tend['url_tender']} \n \n"
-        mes = f"Ответ на запрос поиска тендеров: \n \n"
-        if answ == "":
-            mes += "Ничего не найдено"
+        if (len(str(tenders_id))>4000):
+            tenders_id = pd.DataFrame(tenders_id)
+            get_excel_from_tenders(tenders_id)
+            with io.BytesIO() as output:
+                tenders_id.to_excel(output) 
+                excel_data = output.getvalue()
+            file_excel = io.BytesIO(excel_data)
+            await message.answer_document(BufferedInputFile(file_excel.getvalue(), f"{message.text}.xlsx"), caption = f"Нашлось по запросу '{message.text}'")
         else:
-            mes += answ
-        await message.answer(f"{mes}")
+            answ = ""
+            for num, tend in enumerate(tenders_id):
+                answ += f"{num+1}. Наименование/артикул: {tend['article']}, id тендера: {tend['id_tender']}, прием до: {tend['date_until']}, url: {tend['url_tender']} \n \n"
+            mes = f"Ответ на запрос поиска тендеров: \n \n"
+            if answ == "":
+                mes += "Ничего не найдено"
+            else:
+                mes += answ
+            await message.answer(f"{mes}")
     except Exception as e:
         await message.answer(f"Ошибка: {e}")
 

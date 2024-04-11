@@ -70,17 +70,6 @@ def get_urls(tender_state = 1, article = 0):
     return urls
 
 
-# для масива словарей
-def get_urls1(article, tender_state = 1):
-    # tender_state = 1:открытые 100:все
-    urls = []
-    for key, val in article.items():
-        for art in val:
-            # print(art2)
-            urls.append({"article": f"{key}/{art}", "url": f"https://www.tender.pro/api/tenders/list?&good_name={art}&tender_state={tender_state}&by=1000"})
-    return urls
-
-
 async def fetch(url, session):
     async with session.get(url['url']) as response:
         status = response.status
@@ -117,6 +106,47 @@ async def get_tenders_from_article(article):
     urls = get_urls(article = article)
     return await search_tenders(urls)
 
+
+def sooup(soup, tenders_id, res):
+    for tender in soup.find_all("tr", class_="table-stat__row"):
+        try:
+            id_tender = tender.find("td", class_="tender__id").text
+            date_tender = tender.find("td", class_="tender__untill").text
+        except Exception:
+            continue
+        # if id_tender == None:
+        #     continue
+        # id_tender = id_tender.text
+        for id in tenders_id:
+            if id_tender in id["id_tender"]:
+                print("ПОВТОРЕНИЕ")
+                return tenders_id
+        print(id_tender, date_tender)
+        # resp = requests.get(f"http://www.tender.pro/api/_tender.item.json?_key=1732ede4de680a0c93d81f01d7bac7d1&company_id=1&id={id_tender}")
+        # try:
+        #     goods = resp.json().get("result").get("data")
+        #     goods_name = ""
+        #     goods_amount = 0
+        #     for g in goods:
+        #         name = g.get("name")
+        #         amount = float(g.get("amount"))
+        #         if res['url']['article'].split("/")[1] in name:
+        #             goods_name += name + " "
+        #             goods_amount += amount
+        tenders_id.append({
+            "article": res['url']['article'], 
+            "id_tender": id_tender, 
+            "date_until": date_tender, 
+            "url_tender": f"https://www.tender.pro/api/tender/{id_tender}/view_public", 
+            # "goods_name": goods_name, 
+            # "goods_amount": goods_amount,
+            })
+        # except Exception as e:
+        #     print(e)
+        #     pass
+    return tenders_id
+
+
 async def search_tenders(urls):
     tasks = []
     # create instance of Semaphore
@@ -151,15 +181,9 @@ async def search_tenders(urls):
             for ur in urls2:
                 response = requests.get(ur)
                 soup1 = BeautifulSoup(response.content, "html.parser")
-                for tender in soup1.find_all("td", class_="tender__id"):
-                    id_tender = tender.text
-                    print(id_tender)
-                    tenders_id.append({"article": res['url']['article'], "id_tender": id_tender, "url_tender": f"https://www.tender.pro/api/tender/{id_tender}/view_public"})
-        for tender in soup.find_all("td", class_="tender__id"):
-            id_tender = tender.text
-            print(id_tender)
-            tenders_id.append({"article": res['url']['article'], "id_tender": id_tender, "url_tender": f"https://www.tender.pro/api/tender/{id_tender}/view_public"})
-
+                tenders_id = sooup(soup1, tenders_id, res)
+        tenders_id = sooup(soup, tenders_id, res)
+    
     print(time() - t1)
     for tend in tenders_id:
         print(tend)
