@@ -24,6 +24,7 @@ async def send_employees(bot: Bot, text: str, markup=None, not_me=0):
                         text,
                         reply_markup=markup,
                         # disable_web_page_preview=True,
+                        disable_notification=True,
                     )
     
     # for admin in get_admins():
@@ -65,12 +66,12 @@ async def tenders_sched(bot: Bot):
         bot_logger.warning(f"tenders_id: {tenders_id}")
         answ = ""
         for num, tend in enumerate(tenders_id):
-            answ += f"{num+1}. Наименование/артикул: {tend['article']}, id тендера: {tend['id_tender']}, url: {tend['url_tender']} \n \n"
+            answ += f"{num+1}. Наименование/артикул: {tend['article']}, id тендера: {tend['id_tender']}, прием до: {tend['date_until']}, url: {tend['url_tender']} \n \n"
         mes = f"Автоматический поиск тендоров: \n \n"
         if answ == "":
             mes += "Ничего не найдено"
         else:
             mes += answ
-            await send_employees(bot, answ)
+            await send_employees(bot, mes)
     except:
         send_admins(bot, f"Ошибка при автоматическом поиске")
