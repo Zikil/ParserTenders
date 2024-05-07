@@ -14,6 +14,7 @@ from tgbot.utils.const_functions import ded
 from tgbot.utils.misc.bot_models import FSM, ARS
 from tgbot.utils.misc.bot_logging import bot_logger
 from tgbot.services.parser_tendors import get_tenders_from_url, get_excel_from_tenders, get_articles
+from tgbot.services.tender_plan import tenders_with_goods
 from tgbot.data.config import BOT_SCHEDULER, PATH_EXCEL, PATH_LOGS
 from tgbot.utils.const_functions import get_date
 
@@ -177,3 +178,27 @@ async def admin_log(message: Message, bot: Bot, state: FSM, arSession: ARS, User
     await message.answer_media_group(media=media_group.build())
 
 
+# Поиск тендеров в автопитере
+@router.message(F.text.in_(('Поиск в автопитере', 'tenders_with_goods')))
+@router.message(Command(commands=['tenders_with_goods', 'search_ap']))
+async def search_in_ap(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
+    await state.clear()
+    bot_logger.warning(f"command search_in_ap from {User.user_name}")
+    await message.answer("Идет поиск тендеров")
+    tenders_with_goods()
+    await message.answer_document(
+        FSInputFile('tgbot/data/tenders_with_goods.xlsx'),
+        caption=f"Тендеры в автопитере.",
+    )
+
+
+# таблица тендеров в автопитере
+@router.message(F.text.in_(('Показать автопитер', 'excel_ap')))
+@router.message(Command(commands=['excel_from_ap', 'show_ap']))
+async def excel_from_ap(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
+    await state.clear()
+    bot_logger.warning(f"command excel_from_ap from {User.user_name}")
+    await message.answer_document(
+        FSInputFile('tgbot/data/tenders_with_goods.xlsx'),
+        caption=f"Тендеры в автопитере.",
+    )

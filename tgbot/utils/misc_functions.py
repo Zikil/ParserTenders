@@ -7,6 +7,7 @@ from tgbot.utils.const_functions import get_date, send_admins
 from tgbot.utils.misc.bot_logging import bot_logger
 from tgbot.services.parser_tendors import get_tenders_from_url
 from tgbot.utils.misc.bot_filters import get_employees
+from tgbot.services.tender_plan import tenders_with_goods
 
 
 # Отправка сообщения пользователям по тендорам
@@ -75,3 +76,12 @@ async def tenders_sched(bot: Bot):
             await send_employees(bot, mes)
     except:
         send_admins(bot, f"Ошибка при автоматическом поиске")
+
+
+# поиск тендора в автопитере по расписанию
+async def tenders_sched_ap(bot: Bot):
+    try:
+        tenders_with_goods(5)
+        await send_employees(bot, "поиск по автопитеру выполнен")
+    except:
+        send_admins(bot, f"Ошибка при поиск по автопитеру")

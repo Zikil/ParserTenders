@@ -14,7 +14,7 @@ from tgbot.routers import register_all_routers
 from tgbot.services.api_session import AsyncRequestSession
 from tgbot.utils.misc.bot_commands import set_commands
 from tgbot.utils.misc.bot_logging import bot_logger
-from tgbot.utils.misc_functions import autobackup_admin, startup_notify, tenders_sched
+from tgbot.utils.misc_functions import autobackup_admin, startup_notify, tenders_sched, tenders_sched_ap
 
 colorama.init()
 
@@ -24,6 +24,7 @@ async def scheduler_start(bot):
     # BOT_SCHEDULER.add_job(autobackup_admin, trigger="cron", hour=00, args=(bot,))  # Ежедневный Автобэкап в 00:00
     BOT_SCHEDULER.add_job(tenders_sched, 'cron', hour='8', minute='0', args=(bot,))  # 
     BOT_SCHEDULER.add_job(tenders_sched, 'cron', hour='18', minute='0', args=(bot,))  # 
+    BOT_SCHEDULER.add_job(tenders_sched_ap, 'cron', hour='6', minute='0', args=(bot,))  # 
 
 # scheduler.add_job(func, 'cron', day_of_week='mon-fri', hour=5, minute=30, end_date='2021-05-30')
 

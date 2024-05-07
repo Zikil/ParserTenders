@@ -45,7 +45,7 @@ def create_dbx():
         ############################################################
         # Создание таблицы с хранением - пользователей
         if len(con.execute("PRAGMA table_info(storage_users)").fetchall()) == 8:
-            print("DB was found(1/2)")
+            print("DB was found(1/4)")
         else:
             con.execute(
                 ded(f"""
@@ -61,11 +61,11 @@ def create_dbx():
                     )
                 """)
             )
-            print("DB was not found(1/2) | Creating...")
+            print("DB was not found(1/4) | Creating...")
 
         # Создание таблицы с хранением - настроек
         if len(con.execute("PRAGMA table_info(storage_settings)").fetchall()) == 2: #!!!!!
-            print("DB was found(2/2)")
+            print("DB was found(2/4)")
         else:
             con.execute(
                 ded(f"""
@@ -89,4 +89,36 @@ def create_dbx():
                     'True'
                 ]
             )
-            print("DB was not found(2/2) | Creating...")
+            print("DB was not found(2/4) | Creating...")
+
+        # Создание таблицы с хранением - тендеров
+        if len(con.execute("PRAGMA table_info(storage_tenders)").fetchall()) == 5:
+            print("DB was found(3/4)")
+        else:
+            con.execute(
+                ded(f"""
+                    CREATE TABLE storage_tenders(
+                        tender_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        tender_name TEXT,
+                        tender_link TEXT,
+                        date_creat DATE,
+                        date_until DATE
+                    )
+                """)
+            )
+            print("DB was not found(3/4) | Creating...")
+
+        # Создание таблицы с хранением - товаров
+        if len(con.execute("PRAGMA table_info(storage_goods)").fetchall()) == 3:
+            print("DB was found(4/4)")
+        else:
+            con.execute(
+                ded(f"""
+                    CREATE TABLE storage_goods(
+                        good_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        good_name TEXT,
+                        tender_id INTEGER REFERENCES storage_tenders(tender_id) ON UPDATE CASCADE
+                    )
+                """)
+            )
+            print("DB was not found(4/4) | Creating...")

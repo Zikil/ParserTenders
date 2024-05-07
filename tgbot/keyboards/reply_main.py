@@ -26,12 +26,16 @@ def menu_frep(user_id: int) -> ReplyKeyboardMarkup:
     )
 
     keyboard.row(
-        rkb("Получать уведомления"), rkb("Не получать уведомления"),
+        rkb("Показать автопитер"),
     )
 
     keyboard.row(
-        rkb("Показать таблицу"), rkb("Статус бота"),
+        rkb("Получать уведомления"), rkb("Не получать уведомления"), rkb("Показать таблицу"), rkb("Статус бота"),
     )
+
+    # keyboard.row(
+    #     rkb("Показать таблицу"), rkb("Статус бота"),
+    # )
 
     # if user_id in get_admins():
     #     keyboard.row(
