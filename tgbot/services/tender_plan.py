@@ -117,7 +117,7 @@ def search_in_autopiter(search: str):
         return []
 
 
-def tenders_with_goods(pagecount:int = 1):
+def tenders_with_goods(pagecount = 1):
     try:
 
         tenders_with_goods = []
@@ -137,44 +137,47 @@ def tenders_with_goods(pagecount:int = 1):
                 page += 1
                 tenders = response.json().get('tenders')
                 for tend in tenders:
-                    
-                    tend_name = tend.get('orderName')
-                    id = tend.get('_id')
-                    print(f"tender  --  {tend_name}  --  {id}")
-                    params = {
-                        'id': id,
-                    }
-                    response = requests.get('https://tenderplan.ru/api/tenders/get', params=params, cookies=cookies, headers=headers)
-                    if "ObjectInfo" in response.json().get('json'):
-                        goods = json.loads(response.json().get('json'))["0"]["fv"]["0"]["fv"]["tb"]
-                        ###
-                        submission_close_timestamp = int(json.loads(response.json().get('json'))['1']['fv']['1']['fv'])
-                        print(submission_close_timestamp)
-                        # submission_close_datetime = datetime.fromtimestamp(submission_close_timestamp)#.fromtimestamp(submission_close_timestamp / 1000)
-                        # submission_close_datetime = datetime.datetime.strftime(submission_close_timestamp, '%d/%m/%Y')
-                        submission_close_datetime = datetime.fromtimestamp(submission_close_timestamp/1000).strftime('%Y-%m-%d %H:%M:%S')
-                        for good in goods:
-                            count += 1
-                            # if (count>50):
-                            #     break
-                            good_name = goods.get(good).get('0').get('fv')
-                            # print(f"name - {good_name}")
-                            ap_search = search_in_autopiter(good_name)
-                            for ap_s in ap_search.iterrows():
-                                # print(ap_s)
-                                tenders_with_goods.append({
-                                    "tend_name": tend_name,
-                                    "tend_link": f"https://tenderplan.ru/app?tender={id}",
-                                    "tend_under": submission_close_datetime,
-                                    "good_name": good_name,
-                                    "ap_search_fuzz": ap_s[1].get('ap_name'),
-                                    "ap_search_name": ap_s[1].get('fuzz'),
-                                    "ap_search_link": ap_s[1].get('link_autopiter'),
-                                    "ap_search_price": ap_s[1].get('ap_originalPrice'),
-                                })
-                        # break
+                    try:
+                        tend_name = tend.get('orderName')
+                        id = tend.get('_id')
+                        print(f"tender  --  {tend_name}  --  {id}")
+                        params = {
+                            'id': id,
+                        }
+                        response = requests.get('https://tenderplan.ru/api/tenders/get', params=params, cookies=cookies, headers=headers)
+                        if "ObjectInfo" in response.json().get('json'):
+                            goods = json.loads(response.json().get('json'))["0"]["fv"]["0"]["fv"]["tb"]
+                            ###
+                            submission_close_timestamp = int(json.loads(response.json().get('json'))['1']['fv']['1']['fv'])
+                            print(submission_close_timestamp)
+                            # submission_close_datetime = datetime.fromtimestamp(submission_close_timestamp)#.fromtimestamp(submission_close_timestamp / 1000)
+                            # submission_close_datetime = datetime.datetime.strftime(submission_close_timestamp, '%d/%m/%Y')
+                            submission_close_datetime = datetime.fromtimestamp(submission_close_timestamp/1000).strftime('%Y-%m-%d %H:%M:%S')
+                            for good in goods:
+                                count += 1
+                                # if (count>50):
+                                #     break
+                                good_name = goods.get(good).get('0').get('fv')
+                                # print(f"name - {good_name}")
+                                ap_search = search_in_autopiter(good_name)
+                                for ap_s in ap_search.iterrows():
+                                    # print(ap_s)
+                                    tenders_with_goods.append({
+                                        "tend_name": tend_name,
+                                        "tend_link": f"https://tenderplan.ru/app?tender={id}",
+                                        "tend_under": submission_close_datetime,
+                                        "good_name": good_name,
+                                        "ap_search_fuzz": ap_s[1].get('ap_name'),
+                                        "ap_search_name": ap_s[1].get('fuzz'),
+                                        "ap_search_link": ap_s[1].get('link_autopiter'),
+                                        "ap_search_price": ap_s[1].get('ap_originalPrice'),
+                                    })
+                            # break
+                    except Exception as e:
+                        print("error -- ",e)
+
             except Exception as e:
-                print(e)
+                print("errror - ",e)
         print(f"count - {count}")
 
         for twg in tenders_with_goods:
