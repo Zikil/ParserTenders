@@ -97,7 +97,7 @@ async def tenders_sched(bot: Bot):
 # поиск тендора в автопитере по расписанию
 async def tenders_sched_ap(bot: Bot):
     try:
-        tenders_with_goods(5)
+        tenders_with_goods(100)
         await send_employees(bot, "поиск по автопитеру выполнен")
     except:
         send_admins(bot, f"Ошибка при поиск по автопитеру")
