@@ -67,8 +67,6 @@ async def tenders_sched(bot: Bot):
     try:
         tenders_id = await get_tenders_from_url()
         bot_logger.warning(f"tenders_id: {tenders_id}")
-        tenders_id = await get_tenders_from_url()
-        bot_logger.warning(f"tenders_id: {tenders_id}")
         if (len(str(tenders_id))>4000):
             tenders_id = pd.DataFrame(tenders_id)
             get_excel_from_tenders(tenders_id)
@@ -96,8 +94,9 @@ async def tenders_sched(bot: Bot):
 
 # поиск тендора в автопитере по расписанию
 async def tenders_sched_ap(bot: Bot):
+    bot_logger.warning(f"tenders_sched_ap start")
     try:
-        tenders_with_goods(100)
+        tenders_with_goods(20)
         await send_employees(bot, "поиск по автопитеру выполнен")
     except:
         send_admins(bot, f"Ошибка при поиск по автопитеру")

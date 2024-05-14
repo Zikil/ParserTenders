@@ -8,6 +8,9 @@ from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from datetime import datetime
 import time
 
+from tgbot.utils.misc.bot_logging import bot_logger
+
+
 cookies = {
     'jwt': 's%3ABearer%20a4dc57cc44d5ca62a06a7b19660840a66f3048028b417bbc813a1acf6f3691da841b9120373431377409359f64430b0644ee22ddf072fbe6ad656b57eeebe83d.fv8XBqznQBCV2IGatFCIpsqc3upsd40a7AEZa0kaNTg',
     'referer': 'https://tenderplan.ru/app?key=0&tender=6639e01152e24fc13574139f',
@@ -116,6 +119,7 @@ def search_in_autopiter(search: str):
             #     goods_amount += amount
     except Exception as e:
         print(e)
+        bot_logger.error(f"{e}")
         return []
 
 
@@ -178,10 +182,12 @@ def tenders_with_goods(pagecount: int = 1):
                                             "ap_search_price": ap_s[1].get('ap_originalPrice'),
                                         })
                             # break
-                    except Exception as e:
-                        print("error -- ",e)
+                    except Exception as e1:
+                        print("error -- ",e1)
+                        bot_logger.error(f"{e1}")
             except Exception as e:
                 print(e)
+                bot_logger.error(f"{e}")
         print(f"count - {count}")
 
         # for twg in tenders_with_goods:
@@ -197,6 +203,7 @@ def tenders_with_goods(pagecount: int = 1):
         return tenders_with_goods
     except Exception as e:
         print(e)
+        bot_logger.error(f"{e}")
 
 
 def get_all_price(tenders_with_goods):
@@ -226,6 +233,7 @@ def get_all_price(tenders_with_goods):
             tenders_with_goods2.append(ap)
         except Exception as e:
             print(e)
+            bot_logger.error(f"{e}")
     return tenders_with_goods2
 
 
