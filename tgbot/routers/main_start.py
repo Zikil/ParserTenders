@@ -185,7 +185,7 @@ async def search_in_ap(message: Message, bot: Bot, state: FSM, arSession: ARS, U
     await state.clear()
     bot_logger.warning(f"command search_in_ap from {User.user_name}")
     await message.answer("Идет поиск тендеров")
-    tenders_with_goods(5)
+    tenders_with_goods(1)
     await message.answer_document(
         FSInputFile('tgbot/data/tenders_with_goods.xlsx'),
         caption=f"Тендеры в автопитере.",
