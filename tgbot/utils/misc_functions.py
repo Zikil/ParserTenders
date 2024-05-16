@@ -77,7 +77,11 @@ async def tenders_sched(bot: Bot):
             get_empl = get_employees()
             bot_logger.warning(f"employee1 {get_empl}")
             for empl in get_empl:
-                await bot.send_document(empl.user_id,BufferedInputFile(file_excel.getvalue(), f"everyday_articles.xlsx"), caption = f"Нашлось по расписанию")
+                await bot.send_document(
+                    empl.user_id,
+                    BufferedInputFile(file_excel.getvalue(), f"everyday_articles.xlsx"), 
+                    caption = f"Нашлось по расписанию", 
+                    disable_notification=True)
         else:
             answ = ""
             for num, tend in enumerate(tenders_id):

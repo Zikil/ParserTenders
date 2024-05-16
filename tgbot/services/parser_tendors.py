@@ -43,6 +43,7 @@ def get_articles(link = PATH_EXCEL):
     excel_reader = pd.ExcelFile(link)
     for sheet_name in excel_reader.sheet_names:
         exc = excel_reader.parse(sheet_name, usecols=['Наименование', 'Артикул'])
+        exc['Наименование'] = sheet_name + " / " + exc['Наименование']  # добавление названия листа к наименованию позиции
         all_article = pd.concat([all_article,exc], ignore_index=True)
     all_article = all_article.dropna(inplace=False)    
     all_article["Артикул"] = all_article["Артикул"].astype(str)
@@ -50,6 +51,7 @@ def get_articles(link = PATH_EXCEL):
     # for a in art.iloc:
     #     a["Артикул"].append(a["Наименование"])
     print(f"колич артик:{len(all_article)}")
+    print(f"all_article: {all_article[:2]}")
     return all_article[:]
 
 # для pd
@@ -74,7 +76,7 @@ async def fetch(url, session):
     async with session.get(url['url']) as response:
         status = response.status
         date = response.headers.get("DATE")
-        print("{}:{} with status {}".format(date, response.url, status))
+        print(f"{date}:{response.url} with status {status}")
         data = {'url': url, 'response': await response.text()}
         return data
 

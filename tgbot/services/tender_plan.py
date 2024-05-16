@@ -6,9 +6,12 @@ from thefuzz import fuzz
 from bs4 import BeautifulSoup
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from datetime import datetime
-import time
+from time import time
+import asyncio
+from aiohttp import ClientSession
 
 from tgbot.utils.misc.bot_logging import bot_logger
+from tgbot.services.parser_tendors import get_articles
 
 
 cookies = {
@@ -33,6 +36,147 @@ headers = {
     # 'Cookie': 'jwt=s%3ABearer%20a4dc57cc44d5ca62a06a7b19660840a66f3048028b417bbc813a1acf6f3691da841b9120373431377409359f64430b0644ee22ddf072fbe6ad656b57eeebe83d.fv8XBqznQBCV2IGatFCIpsqc3upsd40a7AEZa0kaNTg; referer=https://tenderplan.ru/app?key=0&tender=6639e01152e24fc13574139f; source=key=0&tender=6639e01152e24fc13574139f; tildauid=1713888711831.359844; __ddg1_=ZKa7JlUseYuy3cvawO9W',
     'Sec-Fetch-Dest': 'empty',
 }
+
+
+# def search_in_tenderplan():
+    # https://tenderplan.ru/api/tenders/getlist?q=F-714117
+    # https://tenderplan.ru/api/tenders/getlist?page=1&q=Komatsu
+    # ...
+
+
+def get_urls(article = 0):
+    urls = []
+    if (article == 0): 
+        article = get_articles()
+        for val in article.iloc:  
+            # print(val["Артикул"])      
+            for art in val["Артикул"]:
+                urls.append({"article": f"{val['Наименование']} / {art}", "url": f"https://tenderplan.ru/api/tenders/getlist?q={art}"})
+    else:
+        articles = article.split(", |,")
+        for art in articles:
+            urls.append({"article": f"{art}", "url": f"https://tenderplan.ru/api/tenders/getlist?q={art}"})
+
+    return urls
+
+async def fetch(url, session):
+    try:
+        async with session.get(url['url']) as response:
+            status = response.status
+            date = response.headers.get("DATE")
+            print(f"{date}:{response.url} with status {status}")
+            data = {'url': url, 'response': await response.json()}
+            return data
+    except Exception as e:
+        print(e)
+        bot_logger.error(f"{e}")
+
+
+async def bound_fetch(sem, url, session):
+    # Getter function with semaphore.
+    async with sem:
+        return await fetch(url, session)
+
+# async def get_tenders_from_url(tender_state = 1):
+#     urls = get_urls(tender_state)
+#     return await search_tenders(urls)
+
+# async def get_tenders_from_article(article):
+#     urls = get_urls(article = article)
+#     return await search_tenders(urls)
+
+def sooup(tenders_id, tenders, res):
+    for tender in tenders:
+        tend_name = tender.get('orderName')
+        tend_id = tender.get('_id')
+        submissionCloseDateTime = tender.get('submissionCloseDateTime')
+        date_until = datetime.fromtimestamp(submissionCloseDateTime/1000).strftime('%Y-%m-%d')
+
+        # for id in tenders_id:
+        #     if tend_id in id["id_tender"]:
+        #         print("ПОВТОРЕНИЕ")
+        #         return tenders_id
+        print(tend_id, date_until)
+        tenders_id.append({
+            "article": res['url']['article'], 
+            "id_tender": tend_id, 
+            "url_tender": f"https://tenderplan.ru/app?tender={tend_id}", 
+            "date_until": date_until, 
+            "tend_name": tend_name,
+            # "goods_name": goods_name, 
+            # "goods_amount": goods_amount,
+            })
+        # except Exception as e:
+        #     print(e)
+        #     pass
+    return tenders_id
+
+
+async def search_in_tenderplan(urls = 0):
+    tenders_id = []
+    try:
+        if urls == 0:
+            urls = get_urls()
+        else: 
+            return 0
+        tasks = []
+        # create instance of Semaphore
+        sem = asyncio.Semaphore(4)
+        results = []
+        t = time()
+        # Create client session that will ensure we dont open new connection
+        # per each request.
+        async with ClientSession(cookies=cookies, headers=headers) as session:
+            for url in urls:
+                # pass Semaphore and session to every GET request
+                task = asyncio.ensure_future(bound_fetch(sem, url, session))
+                tasks.append(task)
+
+            responses = asyncio.gather(*tasks)
+            results = await responses
+        print(time()-t)
+        print(len(results))
+        t1 = time()
+        for res in results:
+            try:
+                if res.get('response').get('tenders'):
+                    tenders = res.get('response').get('tenders')
+                    #pagination
+                    # if len(tenders) > 50:
+                    #     page = 1
+                    #     urls2 = f"https://tenderplan.ru/api/tenders/getlist?page={page}&q={}"
+                    #     while len(tenders) > 50:
+                    #         response = requests.get(ur)
+                    #         soup1 = BeautifulSoup(response.json, "html.parser")
+                    #         tenders_id = sooup(soup1, tenders_id, res)
+                    ########
+                    tenders_id = sooup(tenders_id, tenders, res)
+                else: 
+                    print('tenders none')
+                    # raise Exception("tenders none")
+            except Exception as e:
+                print(e)
+                bot_logger.error(f"{e}")
+        
+        print(time() - t1)
+        for tend in tenders_id:
+            print(tend)
+
+        get_excel_from_tenderplan(tenders_id)
+
+        return tenders_id
+    except Exception as e:
+        print(e)
+        get_excel_from_tenderplan(tenders_id)
+        bot_logger.error(f"{e}")
+
+def get_excel_from_tenderplan(tenders_id, link = 'tgbot/data/tenders_tenderplan_from_art.xlsx'):
+    tends = pd.DataFrame(tenders_id)
+    tends.to_excel(link)
+
+
+
+#################-----###############
 
 
 def split_search(search_string):

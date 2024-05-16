@@ -14,7 +14,7 @@ from tgbot.utils.const_functions import ded
 from tgbot.utils.misc.bot_models import FSM, ARS
 from tgbot.utils.misc.bot_logging import bot_logger
 from tgbot.services.parser_tendors import get_tenders_from_url, get_excel_from_tenders, get_articles
-from tgbot.services.tender_plan import tenders_with_goods
+from tgbot.services.tender_plan import tenders_with_goods, search_in_tenderplan
 from tgbot.data.config import BOT_SCHEDULER, PATH_EXCEL, PATH_LOGS
 from tgbot.utils.const_functions import get_date
 
@@ -43,7 +43,7 @@ async def main_start(message: Message, bot: Bot, state: FSM, arSession: ARS, Use
 
 
 # parser
-@router.message(F.text.in_(('parser', 'Начать поиск сейчас')))
+@router.message(F.text.in_(('parser', 'Начать поиск сейчас', 'Поиск в tenderpro')))
 @router.message(Command(commands=['parser']))
 async def parser(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
     try:
@@ -201,4 +201,18 @@ async def excel_from_ap(message: Message, bot: Bot, state: FSM, arSession: ARS, 
     await message.answer_document(
         FSInputFile('tgbot/data/tenders_with_goods.xlsx'),
         caption=f"Тендеры в автопитере.",
+    )
+
+
+# Поиск тендеров в tenderplan
+@router.message(F.text.in_(('Поиск в tenderplan', 'tenders_in_tenderplan')))
+@router.message(Command(commands=['tenders_in_tenderplan', 'search_in_tenderplan', 'tenderplan']))
+async def search_in_tenderplan1(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
+    await state.clear()
+    bot_logger.warning(f"command search_in_tenderplan from {User.user_name}")
+    await message.answer("Идет поиск тендеров")
+    await search_in_tenderplan()
+    await message.answer_document(
+        FSInputFile('tgbot/data/tenders_tenderplan_from_art.xlsx'),
+        caption=f"Тендеры из tenderplan.",
     )

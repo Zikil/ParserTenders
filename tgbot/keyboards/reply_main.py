@@ -22,12 +22,16 @@ def menu_frep(user_id: int) -> ReplyKeyboardMarkup:
     # BotCommand(command="db", description="📦 Get Database"),
 
     keyboard.row(
-        rkb("Начать поиск сейчас"), rkb("Поиск за все время"),
+        rkb("Поиск в tenderpro"), rkb("Поиск в tenderplan"), rkb("Tendrepro поиск за все время "),
     )
 
     keyboard.row(
         rkb("Показать автопитер"),
     )
+
+    # keyboard.row(
+    #     rkb("Поиск в tenderplan"),
+    # )
 
     keyboard.row(
         rkb("Получать уведомления"), rkb("Не получать уведомления"), rkb("Показать таблицу"), rkb("Статус бота"),
