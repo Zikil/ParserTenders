@@ -6,6 +6,8 @@ import pandas as pd
 from time import time
 import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from tgbot.data.config import PATH_EXCEL
+from tgbot.utils.misc.bot_logging import bot_logger
+
 
 
 # arrt = [
@@ -50,7 +52,8 @@ def get_articles(link = PATH_EXCEL):
     all_article["Артикул"] = all_article["Артикул"].str.split(", | ,")
     # for a in art.iloc:
     #     a["Артикул"].append(a["Наименование"])
-    print(f"колич артик:{len(all_article)}")
+    # print(f"колич артик:{len(all_article)}")
+    bot_logger.warning(f"колич артик:{len(all_article)}")
     print(f"all_article: {all_article[:2]}")
     return all_article[:]
 

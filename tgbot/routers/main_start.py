@@ -214,5 +214,17 @@ async def search_in_tenderplan1(message: Message, bot: Bot, state: FSM, arSessio
     await search_in_tenderplan()
     await message.answer_document(
         FSInputFile('tgbot/data/tenders_tenderplan_from_art.xlsx'),
-        caption=f"Тендеры из tenderplan.",
+        caption=f"Тендеры в tenderplan.",
+    )
+
+
+# таблица тендеров в tenderplan
+@router.message(F.text.in_(('Показать tenderplan', 'excel_tenderplan')))
+@router.message(Command(commands=['excel_from_tenderplan', 'show_tenderplan']))
+async def excel_from_tenderplan(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
+    await state.clear()
+    bot_logger.warning(f"command excel_from_tenderplan from {User.user_name}")
+    await message.answer_document(
+        FSInputFile('tgbot/data/tenders_tenderplan_from_art.xlsx'),
+        caption=f"Тендеры в tenderplan.",
     )

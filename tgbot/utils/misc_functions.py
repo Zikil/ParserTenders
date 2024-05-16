@@ -7,7 +7,7 @@ from tgbot.utils.const_functions import get_date, send_admins
 from tgbot.utils.misc.bot_logging import bot_logger
 from tgbot.services.parser_tendors import get_tenders_from_url, get_excel_from_tenders
 from tgbot.utils.misc.bot_filters import get_employees
-from tgbot.services.tender_plan import tenders_with_goods
+from tgbot.services.tender_plan import tenders_with_goods, search_in_tenderplan
 import os
 import io
 import pandas as pd
@@ -104,3 +104,20 @@ async def tenders_sched_ap(bot: Bot):
         await send_employees(bot, "поиск по автопитеру выполнен")
     except:
         send_admins(bot, f"Ошибка при поиск по автопитеру")
+
+
+# Поиск тендеров в tenderplan по расписанию
+async def tenders_sched_ap_in_tenderplan(bot: Bot):
+    bot_logger.warning(f"tenders_sched_ap_in_tenderplan")
+    await search_in_tenderplan()
+    get_empl = get_employees()
+    for empl in get_empl:
+        await bot.send_document(
+            empl.user_id,
+            FSInputFile('tgbot/data/tenders_tenderplan_from_art.xlsx'), 
+            caption = f"Нашлось из tenderplan по расписанию", 
+            disable_notification=True)
+    # await message.answer_document(
+    #     FSInputFile('tgbot/data/tenders_tenderplan_from_art.xlsx'),
+    #     caption=f"Тендеры из tenderplan.",
+    # )

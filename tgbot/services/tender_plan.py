@@ -62,9 +62,14 @@ def get_urls(article = 0):
 async def fetch(url, session):
     try:
         async with session.get(url['url']) as response:
-            status = response.status
+            k = 0
+            while response.status != 200:
+                asyncio.sleep(5)
+                k += 1
+                if k > 5: break
+
             date = response.headers.get("DATE")
-            print(f"{date}:{response.url} with status {status}")
+            print(f"{date}:{response.url} with status {response.status}")
             data = {'url': url, 'response': await response.json()}
             return data
     except Exception as e:
@@ -121,7 +126,7 @@ async def search_in_tenderplan(urls = 0):
             return 0
         tasks = []
         # create instance of Semaphore
-        sem = asyncio.Semaphore(4)
+        sem = asyncio.Semaphore(3)
         results = []
         t = time()
         # Create client session that will ensure we dont open new connection
@@ -153,6 +158,7 @@ async def search_in_tenderplan(urls = 0):
                     tenders_id = sooup(tenders_id, tenders, res)
                 else: 
                     print('tenders none')
+                    # bot_logger.error(f"tenders none, скорее всего 429 ошибка")
                     # raise Exception("tenders none")
             except Exception as e:
                 print(e)
