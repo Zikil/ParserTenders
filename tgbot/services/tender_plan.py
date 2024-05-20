@@ -6,7 +6,7 @@ from thefuzz import fuzz
 from bs4 import BeautifulSoup
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from datetime import datetime
-from time import time
+import time
 import asyncio
 from aiohttp import ClientSession
 
@@ -59,28 +59,68 @@ def get_urls(article = 0):
 
     return urls
 
-async def fetch(url, session):
+
+# async def fetch(url, session):
+#     st = ''
+#     try:
+#         async with session.get(url['url']) as response:
+#             k = 0
+#             st = response.status
+#             while response.status != 200:
+#                 time.sleep(5)
+#                 print('sleeep')
+#                 k += 1
+#                 if k > 5: break
+
+#             date = response.headers.get("DATE")
+#             print(f"{date}:{response.url} with status {response.status}")
+#             data = {'url': url, 'response': await response.json()}
+#             return data
+#     except Exception as e:
+#         print(e)
+#         bot_logger.error(f"st:{st} --- {e}")
+
+
+# async def bound_fetch(sem, url, session):
+#     # Getter function with semaphore.
+#     async with sem:
+#         return await fetch(url, session)
+
+async def fetch(url, session, retry_event):
+    st = ''
     try:
         async with session.get(url['url']) as response:
             k = 0
-            while response.status != 200:
-                asyncio.sleep(5)
-                k += 1
-                if k > 5: break
+            st = response.status
+            while response.status == 429:
+                await retry_event.wait()  # Ожидаем разрешения продолжения запросов
+                async with session.get(url['url']) as response:
+                    st = response.status
 
-            date = response.headers.get("DATE")
-            print(f"{date}:{response.url} with status {response.status}")
-            data = {'url': url, 'response': await response.json()}
-            return data
+            while response.status != 200 and k <= 5:
+                await asyncio.sleep(5)  # Асинхронная задержка
+                print('sleeep')
+                k += 1
+                async with session.get(url['url']) as response:
+                    st = response.status
+
+            if response.status == 200:
+                date = response.headers.get("DATE")
+                print(f"{date}: {response.url} со статусом {response.status}")
+                data = {'url': url, 'response': await response.json()}
+                return data
+            else:
+                print(f"Не удалось получить {url['url']} после {k} попыток")
+                return None
     except Exception as e:
         print(e)
-        bot_logger.error(f"{e}")
+        bot_logger.error(f"st: {st} --- {e}")
 
-
-async def bound_fetch(sem, url, session):
-    # Getter function with semaphore.
+async def bound_fetch(sem, url, session, retry_event):
+    # Функция получения данных с семафором
     async with sem:
-        return await fetch(url, session)
+        return await fetch(url, session, retry_event)
+
 
 # async def get_tenders_from_url(tender_state = 1):
 #     urls = get_urls(tender_state)
@@ -127,21 +167,33 @@ async def search_in_tenderplan(urls = 0):
         tasks = []
         # create instance of Semaphore
         sem = asyncio.Semaphore(3)
+        retry_event = asyncio.Event()
+        retry_event.set()  # Устанавливаем событие в начальное состояние
+
         results = []
-        t = time()
+        t = time.time()
         # Create client session that will ensure we dont open new connection
         # per each request.
         async with ClientSession(cookies=cookies, headers=headers) as session:
-            for url in urls:
-                # pass Semaphore and session to every GET request
-                task = asyncio.ensure_future(bound_fetch(sem, url, session))
-                tasks.append(task)
+            tasks = [bound_fetch(sem, url, session, retry_event) for url in urls]
+            
+            while True:
+                results1 = await asyncio.gather(*tasks, return_exceptions=True)
+                for result in results1:
+                    if isinstance(result, Exception):
+                        continue
+                    if result and result.get('response').get('status') == 429:
+                        retry_event.clear()  # Останавливаем отправку запросов при 429
+                        await asyncio.sleep(5)  # Ждем некоторое время перед повторной попыткой
+                        retry_event.set()  # Разрешаем отправку запросов снова
+                if all(result and result['response']['status'] == 200 for result in results if not isinstance(result, Exception)):
+                    break  # Завершаем, если все запросы успешны
 
-            responses = asyncio.gather(*tasks)
-            results = await responses
-        print(time()-t)
+            # responses = asyncio.gather(*tasks)
+            results = results1
+        print(time.time()-t)
         print(len(results))
-        t1 = time()
+        t1 = time.time()
         for res in results:
             try:
                 if res.get('response').get('tenders'):
@@ -164,7 +216,7 @@ async def search_in_tenderplan(urls = 0):
                 print(e)
                 bot_logger.error(f"{e}")
         
-        print(time() - t1)
+        print(time.time() - t1)
         for tend in tenders_id:
             print(tend)
 

@@ -79,8 +79,8 @@ async def parser(message: Message, bot: Bot, state: FSM, arSession: ARS, User: U
 async def status(message: Message, bot: Bot, state: FSM, arSession: ARS, User: UserModel):
     bot_logger.warning(f"command status from {User.user_name}")
     jobs = BOT_SCHEDULER.get_jobs()
-    bot_logger.warning(f"jobs: {jobs[0]}, {jobs[1]}")
-    await message.answer(f"jobs: \n{jobs[0]}, \n{jobs[1]}")
+    bot_logger.warning(f"jobs: {jobs}")
+    await message.answer(f"jobs: \n{[str(j) for j in jobs]}")
 
 # start notification
 @router.message(F.text.in_(('Получать уведомления', 'get_notif')))
