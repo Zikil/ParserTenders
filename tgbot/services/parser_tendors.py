@@ -45,7 +45,7 @@ def get_articles(link = PATH_EXCEL):
     excel_reader = pd.ExcelFile(link)
     for sheet_name in excel_reader.sheet_names:
         exc = excel_reader.parse(sheet_name, usecols=['Наименование', 'Артикул'])
-        exc['Наименование'] = sheet_name + " / " + str(exc['Наименование'])  # добавление названия листа к наименованию позиции
+        exc['Наименование'] = sheet_name + " / " + str(exc['Наименование'].values)  # добавление названия листа к наименованию позиции
         all_article = pd.concat([all_article,exc], ignore_index=True)
     all_article = all_article.dropna(inplace=False)    
     all_article["Артикул"] = all_article["Артикул"].astype(str)
