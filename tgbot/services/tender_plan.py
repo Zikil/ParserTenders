@@ -161,7 +161,7 @@ def sooup(tenders_id, tenders, res):
 
             # Проверка, найдены ли строки
             if not price.empty:
-                print(price.to_string(index=False))
+                print(price)
             else:
                 print("Строки, содержащие указанный текст, не найдены")
         
@@ -172,7 +172,7 @@ def sooup(tenders_id, tenders, res):
         print(tend_id, date_until)
         tenders_id.append({
             "article": res.get('url').get('article'), 
-            "price": price.to_string(index=False),
+            "price": price,
             "id_tender": tend_id, 
             "url_tender": f"https://tenderplan.ru/app?tender={tend_id}", 
             "date_until": date_until, 
