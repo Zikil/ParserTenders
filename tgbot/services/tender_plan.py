@@ -1,3 +1,5 @@
+import os
+import glob
 import requests
 import json
 import pandas as pd
@@ -51,7 +53,7 @@ def get_urls(article = 0):
         for val in article.iloc:  
             # print(val["Артикул"])      
             for art in val["Артикул"]:
-                urls.append({"article": f"{val['Наименование']} / {art}", "url": f"https://tenderplan.ru/api/tenders/getlist?q={art}"})
+                urls.append({"article": f"{val['Наименование']} / {art}", "art": art, "url": f"https://tenderplan.ru/api/tenders/getlist?q={art}"})
     else:
         articles = article.split(", |,")
         for art in articles:
@@ -122,6 +124,7 @@ async def bound_fetch(sem, url, session, retry_event):
         return await fetch(url, session, retry_event)
 
 
+
 # async def get_tenders_from_url(tender_state = 1):
 #     urls = get_urls(tender_state)
 #     return await search_tenders(urls)
@@ -137,13 +140,39 @@ def sooup(tenders_id, tenders, res):
         submissionCloseDateTime = tender.get('submissionCloseDateTime')
         date_until = datetime.fromtimestamp(submissionCloseDateTime/1000).strftime('%Y-%m-%d')
 
+        price = '-'
+
+        
+        # Поиск и вывод файлов
+        excel_files = [name for name in glob.glob(f'/Users/zik/Documents/Programs/ParserTenders/tgbot/data/price*.xls*')]
+        print(f'excel_files-{excel_files}')
+
+        for file in excel_files:
+            print(f'file-{file}')
+            # Загрузка Excel файла
+            excel_file = file
+            df = pd.read_excel(excel_file)
+
+            # Название для поиска
+            search_term = res.get("url").get("art")
+
+            # Поиск строк, содержащих текст запроса
+            price = df[df.apply(lambda row: row.astype(str).str.contains(search_term, case=False).any(), axis=1)]
+
+            # Проверка, найдены ли строки
+            if not price.empty:
+                print(price.to_string(index=False))
+            else:
+                print("Строки, содержащие указанный текст, не найдены")
+        
         # for id in tenders_id:
         #     if tend_id in id["id_tender"]:
         #         print("ПОВТОРЕНИЕ")
         #         return tenders_id
         print(tend_id, date_until)
         tenders_id.append({
-            "article": res['url']['article'], 
+            "article": res.get('url').get('article'), 
+            "price": price.to_string(index=False),
             "id_tender": tend_id, 
             "url_tender": f"https://tenderplan.ru/app?tender={tend_id}", 
             "date_until": date_until, 
@@ -208,7 +237,7 @@ async def search_in_tenderplan(urls = 0):
                     #         tenders_id = sooup(soup1, tenders_id, res)
                     ########
                     tenders_id = sooup(tenders_id, tenders, res)
-                else: 
+                else:
                     print('tenders none')
                     # bot_logger.error(f"tenders none, скорее всего 429 ошибка")
                     # raise Exception("tenders none")
@@ -234,7 +263,7 @@ def get_excel_from_tenderplan(tenders_id, link = 'tgbot/data/tenders_tenderplan_
 
 
 
-#################-----###############
+######################################--------AUTOPITER-------########################################
 
 
 def split_search(search_string):

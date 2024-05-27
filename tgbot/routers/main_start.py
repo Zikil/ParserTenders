@@ -116,16 +116,21 @@ async def upload_excel(message: Message, bot: Bot, state: FSM, arSession: ARS, U
         file_id = message.document.file_id
         file = await bot.get_file(file_id)
         file_path = file.file_path
-        link_temp = "tgbot/data/articles_sheet_temp.xlsx"
-        await bot.download_file(file_path, link_temp)
-        try:
-            arts = get_articles(link=link_temp)
-            bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, загружен")
-            await bot.download_file(file_path, "tgbot/data/articles_sheet.xlsx")
-            await message.answer("Таблица загружена")
-        except Exception as e:
-            bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, не загружен. Ошибка {e}")
-            await message.answer(f"Ошибка {e} \nФайл не был загружен")
+        if message.document.file_name.find('articles_sheet') != -1:
+            link_temp = "tgbot/data/articles_sheet_temp.xlsx"
+            await bot.download_file(file_path, link_temp)
+            try:
+                arts = get_articles(link=link_temp)
+                bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, загружен")
+                await bot.download_file(file_path, "tgbot/data/articles_sheet.xlsx")
+                await message.answer("Таблица загружена")
+            except Exception as e:
+                bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, не загружен. Ошибка {e}")
+                await message.answer(f"Ошибка {e} \nФайл не был загружен")
+        else:
+            await bot.download_file(file_path, f"tgbot/data/price_{message.document.file_name}")
+            await message.answer(f"Таблица {message.document.file_name} загружена")
+        
     else:
         bot_logger.warning(f"command upload_excel from {User.user_name}. файл: {message.document.file_name}, не загружен")
         await message.answer("Файл должен быть с расширением .xls или .xlsx")
