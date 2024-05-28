@@ -142,9 +142,13 @@ def sooup(tenders_id, tenders, res):
 
         price = '-'
 
+        path = "tgbot/data/"
+        abs_path = os.path.abspath(path)
         
+        print("Absolute path:", abs_path)
+
         # Поиск и вывод файлов
-        excel_files = [name for name in glob.glob(f'/Users/zik/Documents/Programs/ParserTenders/tgbot/data/price*.xls*')]
+        excel_files = [name for name in glob.glob(f'{abs_path}/price*.xls*')]
         print(f'excel_files-{excel_files}')
 
         for file in excel_files:
