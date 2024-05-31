@@ -140,35 +140,28 @@ def sooup(tenders_id, tenders, res):
         submissionCloseDateTime = tender.get('submissionCloseDateTime')
         date_until = datetime.fromtimestamp(submissionCloseDateTime/1000).strftime('%Y-%m-%d')
 
-        price = '-'
-
+        #  поиск цены в таблицах
+        price = []
         path = "tgbot/data/"
         abs_path = os.path.abspath(path)
-        
-        print("Absolute path:", abs_path)
-
         # Поиск и вывод файлов
         excel_files = [name for name in glob.glob(f'{abs_path}/price*.xls*')]
-        print(f'excel_files-{excel_files}')
-
+        # print(f'excel_files-{excel_files}')
         for file in excel_files:
-            print(f'file-{file}')
+            # print(f'file-{file}')
             # Загрузка Excel файла
             excel_file = file
             df = pd.read_excel(excel_file)
-
-            # Название для поиска
             search_term = res.get("url").get("art")
-
             # Поиск строк, содержащих текст запроса
-            price = df[df.apply(lambda row: row.astype(str).str.contains(search_term, case=False).any(), axis=1)]
-
+            sear = df[df.apply(lambda row: row.astype(str).str.contains(search_term, case=False).any(), axis=1)].to_dict('index')
+            print("sear  ",sear)
+            price.append(sear)
+            print("price  ",price)
             # Проверка, найдены ли строки
-            if not price.empty:
-                print(price)
-            else:
-                print("Строки, содержащие указанный текст, не найдены")
-        
+
+        # price = price
+
         # for id in tenders_id:
         #     if tend_id in id["id_tender"]:
         #         print("ПОВТОРЕНИЕ")
