@@ -169,6 +169,7 @@ def sooup(tenders_id, tenders, res):
         print(tend_id, date_until)
         tenders_id.append({
             "article": res.get('url').get('article'), 
+            "art": res.get('url').get('art'),
             "price": price,
             "id_tender": tend_id, 
             "url_tender": f"https://tenderplan.ru/app?tender={tend_id}", 
