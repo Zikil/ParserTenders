@@ -137,8 +137,21 @@ def sooup(tenders_id, tenders, res):
     for tender in tenders:
         tend_name = tender.get('orderName')
         tend_id = tender.get('_id')
+        good_count = ''
         submissionCloseDateTime = tender.get('submissionCloseDateTime')
         date_until = datetime.fromtimestamp(submissionCloseDateTime/1000).strftime('%Y-%m-%d')
+
+        params = {'id': tend_id,}
+        response = requests.get('https://tenderplan.ru/api/tenders/get', params=params, cookies=cookies, headers=headers)
+        if "Количество" in json.loads(response.json().get('json')).get("0").get("fv").get("0").get("fv").get("th").get("1").get("fv"):
+            goods = json.loads(response.json().get('json')).get("0").get("fv").get("0").get("fv").get("tb")
+            for good in goods:
+                good_name = goods.get(good).get('0').get('fv')
+                if res.get('url').get('art') in good_name:
+                    good_count = goods.get(good).get('1').get('fv')
+                    print(f"name - {good_name}")
+
+        print(tend_id, date_until)
 
         #  поиск цены в таблицах
         price = []
@@ -160,24 +173,26 @@ def sooup(tenders_id, tenders, res):
             print("price  ",price)
             # Проверка, найдены ли строки
 
-        # price = price
+        # price - ['Артикул','Бренд','Кол-во','Цена, руб. с НДС']
 
-        # for id in tenders_id:
-        #     if tend_id in id["id_tender"]:
-        #         print("ПОВТОРЕНИЕ")
-        #         return tenders_id
-        print(tend_id, date_until)
-        tenders_id.append({
-            "article": res.get('url').get('article'), 
-            "art": res.get('url').get('art'),
-            "price": price,
-            "id_tender": tend_id, 
-            "url_tender": f"https://tenderplan.ru/app?tender={tend_id}", 
-            "date_until": date_until, 
-            "tend_name": tend_name,
-            # "goods_name": goods_name, 
-            # "goods_amount": goods_amount,
-            })
+            print("pri - ", sear)
+            for p in sear.values():
+                print("p - ", p)
+                tenders_id.append({
+                    "article": res.get('url').get('article'), 
+                    "art0": res.get('url').get('art'),
+                    # "price": price,
+                    "файл": file.split('/')[-1],
+                    "Артикул": p.get("Артикул"),
+                    "Бренд": p.get("Бренд"),
+                    "Кол-во": p.get("Кол-во"),
+                    "Цена": p.get("Цена, руб. с НДС"),
+                    "good_count": good_count,
+                    "id_tender": tend_id, 
+                    "url_tender": f"tenderplan.ru/app?tender={tend_id}", 
+                    "date_until": date_until, 
+                    "tend_name": tend_name,
+                    })
         # except Exception as e:
         #     print(e)
         #     pass
@@ -257,6 +272,7 @@ async def search_in_tenderplan(urls = 0):
 
 def get_excel_from_tenderplan(tenders_id, link = 'tgbot/data/tenders_tenderplan_from_art.xlsx'):
     tends = pd.DataFrame(tenders_id)
+    tends.drop_duplicates(ignore_index=True)
     tends.to_excel(link)
 
 
