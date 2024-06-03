@@ -4,7 +4,7 @@ import requests
 import json
 import pandas as pd
 import re
-from thefuzz import fuzz
+from thefuzz import fuzz # type: ignore
 from bs4 import BeautifulSoup
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from datetime import datetime
@@ -189,7 +189,7 @@ def sooup(tenders_id, tenders, res):
                     "Цена": p.get("Цена, руб. с НДС"),
                     "good_count": good_count,
                     "id_tender": tend_id, 
-                    "url_tender": f"tenderplan.ru/app?tender={tend_id}", 
+                    "url_tender": f"https://tenderplan.ru/app?tender={tend_id}", 
                     "date_until": date_until, 
                     "tend_name": tend_name,
                     })
