@@ -149,6 +149,7 @@ def sooup(tenders_id, tenders, res):
                 good_name = goods.get(good).get('0').get('fv')
                 if res.get('url').get('art') in good_name:
                     good_count = goods.get(good).get('1').get('fv')
+
                     print(f"name - {good_name}")
 
         print(tend_id, date_until)
@@ -169,30 +170,33 @@ def sooup(tenders_id, tenders, res):
             # Поиск строк, содержащих текст запроса
             sear = df[df.apply(lambda row: row.astype(str).str.contains(search_term, case=False).any(), axis=1)].to_dict('index')
             print("sear  ",sear)
-            price.append(sear)
+            price.append({file.split('/')[-1]: sear})
             print("price  ",price)
-            # Проверка, найдены ли строки
 
         # price - ['Артикул','Бренд','Кол-во','Цена, руб. с НДС']
 
+        for pri in price:
             print("pri - ", sear)
-            for p in sear.values():
-                print("p - ", p)
-                tenders_id.append({
-                    "article": res.get('url').get('article'), 
-                    "art0": res.get('url').get('art'),
-                    # "price": price,
-                    "файл": file.split('/')[-1],
-                    "Артикул": p.get("Артикул"),
-                    "Бренд": p.get("Бренд"),
-                    "Кол-во": p.get("Кол-во"),
-                    "Цена": p.get("Цена, руб. с НДС"),
-                    "good_count": good_count,
-                    "id_tender": tend_id, 
-                    "url_tender": f"https://tenderplan.ru/app?tender={tend_id}", 
-                    "date_until": date_until, 
-                    "tend_name": tend_name,
-                    })
+            for keyprice, valprice in pri.items():
+                for p in valprice.values():
+                    print("p - ", p)
+                    tenders_id.append({
+                        "article": res.get('url').get('article'), 
+                        "art0": res.get('url').get('art'),
+                        # "price": price,
+                        "файл": keyprice,
+                        "Артикул": p.get("Артикул"),
+                        "Бренд": p.get("Бренд"),
+                        "Кол-во": p.get("Кол-во"),
+                        "Цена": p.get("Цена, руб. с НДС"),
+                        "good_count": good_count,
+                        "id_tender": tend_id, 
+                        "url_tender": f"https://tenderplan.ru/app?tender={tend_id}", 
+                        "date_until": date_until, 
+                        "tend_name": tend_name,
+                        "platform": response.json().get('platform').get('name'),
+                        "href": response.json().get('href'),
+                        })
         # except Exception as e:
         #     print(e)
         #     pass
