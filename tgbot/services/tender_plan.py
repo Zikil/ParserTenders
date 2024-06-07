@@ -197,6 +197,25 @@ def sooup(tenders_id, tenders, res):
                         "platform": response.json().get('platform').get('name'),
                         "href": response.json().get('href'),
                         })
+                    
+        if price == []:
+            tenders_id.append({
+                "article": res.get('url').get('article'), 
+                "art0": res.get('url').get('art'),
+                # "price": price,
+                "файл": '--',
+                "Артикул": '--',
+                "Бренд": '--',
+                "Кол-во": '--',
+                "Цена": '--',
+                "good_count": good_count,
+                "id_tender": tend_id, 
+                "url_tender": f"https://tenderplan.ru/app?tender={tend_id}", 
+                "date_until": date_until, 
+                "tend_name": tend_name,
+                "platform": response.json().get('platform').get('name'),
+                "href": response.json().get('href'),
+                })
         # except Exception as e:
         #     print(e)
         #     pass
