@@ -53,11 +53,11 @@ def get_urls(article = 0):
         for val in article.iloc:  
             # print(val["Артикул"])      
             for art in val["Артикул"]:
-                urls.append({"article": f"{val['Наименование']} / {art}", "art": art, "url": f"https://tenderplan.ru/api/tenders/getlist?q={art}"})
+                urls.append({"article": f"{val['Наименование']} / {art}", "art": art, "url": f"https://tenderplan.ru/api/tenders/getlist?isActual=1&q={art}"})
     else:
         articles = article.split(", |,")
         for art in articles:
-            urls.append({"article": f"{art}", "url": f"https://tenderplan.ru/api/tenders/getlist?q={art}"})
+            urls.append({"article": f"{art}", "url": f"https://tenderplan.ru/api/tenders/getlist?isActual=1&q={art}"})
 
     return urls
 
