@@ -167,6 +167,8 @@ def sooup(tenders_id, tenders, res):
             excel_file = file
             df = pd.read_excel(excel_file)
             search_term = res.get("url").get("art")
+            if search_term.isalpha():
+                continue
             # Поиск строк, содержащих текст запроса
             sear = df[df.apply(lambda row: row.astype(str).str.contains(search_term, case=False).any(), axis=1)].to_dict('index')
             print("sear  ",sear)
@@ -197,8 +199,7 @@ def sooup(tenders_id, tenders, res):
                         "platform": response.json().get('platform').get('name'),
                         "href": response.json().get('href'),
                         })
-                    
-        if price == []:
+        else:
             tenders_id.append({
                 "article": res.get('url').get('article'), 
                 "art0": res.get('url').get('art'),
