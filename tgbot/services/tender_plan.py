@@ -17,16 +17,14 @@ from tgbot.services.parser_tendors import get_articles
 
 
 cookies = {
-    'jwt': 's%3ABearer%20a4dc57cc44d5ca62a06a7b19660840a66f3048028b417bbc813a1acf6f3691da841b9120373431377409359f64430b0644ee22ddf072fbe6ad656b57eeebe83d.fv8XBqznQBCV2IGatFCIpsqc3upsd40a7AEZa0kaNTg',
-    'referer': 'https://tenderplan.ru/app?key=0&tender=6639e01152e24fc13574139f',
-    'source': 'key=0&tender=6639e01152e24fc13574139f',
-    'tildauid': '1713888711831.359844',
+    'jwt': 's%3ABearer%20e69b49cfdb6045d21c4a928fb4e83294cadd0e1f19b65cef2f15d150e693af1567669b9b032b15d7b398164dbe0872e18ac38616deb40bfc80a8fdc1abb13b5d.gGyb3uw24ieCbbYtBad6%2B7G3ZVmfUzcLPDODWs4sCdE',
+    'referer': 'https://tenderplan.ru/app',
     '__ddg1_': 'ZKa7JlUseYuy3cvawO9W',
 }
 
 headers = {
     'Accept': '*/*',
-    'Authorization': 'Bearer a4dc57cc44d5ca62a06a7b19660840a66f3048028b417bbc813a1acf6f3691da841b9120373431377409359f64430b0644ee22ddf072fbe6ad656b57eeebe83d',
+    'Authorization': 'Bearer e69b49cfdb6045d21c4a928fb4e83294cadd0e1f19b65cef2f15d150e693af1567669b9b032b15d7b398164dbe0872e18ac38616deb40bfc80a8fdc1abb13b5d',
     'Sec-Fetch-Site': 'same-origin',
     'Accept-Language': 'ru',
     # 'Accept-Encoding': 'gzip, deflate, br',
@@ -34,8 +32,8 @@ headers = {
     'Host': 'tenderplan.ru',
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15',
     'Connection': 'keep-alive',
-    'Referer': 'https://tenderplan.ru/app?key=0&tender=6639e01152e24fc13574139f',
-    # 'Cookie': 'jwt=s%3ABearer%20a4dc57cc44d5ca62a06a7b19660840a66f3048028b417bbc813a1acf6f3691da841b9120373431377409359f64430b0644ee22ddf072fbe6ad656b57eeebe83d.fv8XBqznQBCV2IGatFCIpsqc3upsd40a7AEZa0kaNTg; referer=https://tenderplan.ru/app?key=0&tender=6639e01152e24fc13574139f; source=key=0&tender=6639e01152e24fc13574139f; tildauid=1713888711831.359844; __ddg1_=ZKa7JlUseYuy3cvawO9W',
+    'Referer': 'https://tenderplan.ru/app',
+    # 'Cookie': 'jwt=s%3ABearer%20e69b49cfdb6045d21c4a928fb4e83294cadd0e1f19b65cef2f15d150e693af1567669b9b032b15d7b398164dbe0872e18ac38616deb40bfc80a8fdc1abb13b5d.gGyb3uw24ieCbbYtBad6%2B7G3ZVmfUzcLPDODWs4sCdE; referer=https://tenderplan.ru/app; __ddg1_=ZKa7JlUseYuy3cvawO9W',
     'Sec-Fetch-Dest': 'empty',
 }
 
