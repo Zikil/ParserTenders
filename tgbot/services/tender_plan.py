@@ -293,9 +293,47 @@ async def search_in_tenderplan(urls = 0):
         bot_logger.error(f"{e}")
 
 def get_excel_from_tenderplan(tenders_id, link = 'tgbot/data/tenders_tenderplan_from_art.xlsx'):
-    tends = pd.DataFrame(tenders_id)
-    tends.drop_duplicates(ignore_index=True)
-    tends.to_excel(link)
+    # oldtends = pd.DataFrame(link)
+    # newtends = pd.DataFrame(tenders_id)
+    
+    # Предположим, ваш список с тендерами называется ``
+    df = pd.DataFrame(tenders_id)
+    df = df.drop_duplicates(ignore_index=True)
+
+    # Читаем существующий Excel файл, если он есть
+    try:
+        existing_df = pd.read_excel(link, engine='openpyxl')
+    except FileNotFoundError:
+        existing_df = pd.DataFrame()
+
+    # Объединяем DataFrame с помощью merge, используя indicator=True
+    merged_df = df.merge(existing_df, how='left', indicator=True)
+
+    # Определяем строки, которые есть в ОБЕИХ таблицах
+    in_both_df = merged_df[merged_df['_merge'] == 'both']
+
+    # Сохраняем в Excel с выделением нужных строк красным
+    writer = pd.ExcelWriter(link, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='Tenders', index=False)
+
+    # Получаем объект workbook
+    workbook = writer.book
+    # Получаем объект worksheet
+    worksheet = workbook.get_worksheet_by_name('Tenders')
+
+    # Применяем стиль к строкам, которые есть в ОБЕИХ таблицах
+    for index in in_both_df.index:
+        worksheet.conditional_format(index+1, 0, index+1, len(df.columns)-1, {
+            'type': 'no_errors',
+            'format': workbook.add_format({'bg_color': '#FFC7CE'})
+        })
+
+    # Сохраняем файл
+    writer.close()
+
+
+
+    # newtends.to_excel(link)
 
 
 
